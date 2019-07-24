@@ -1,6 +1,7 @@
 <?php
 namespace App\Frontend\Modules\News;
 
+use \Entity\Comment;
 use \OCFram\BackController;
 use \OCFram\HTTPRequest;
 
