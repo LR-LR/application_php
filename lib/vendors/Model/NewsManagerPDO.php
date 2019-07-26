@@ -2,6 +2,35 @@
 namespace Model;
 
 class NewsManagerPDO extends NewsManager {
+    protected function add(News $news) {
+        $requete = $this->dao->prepare('INSERT INTO news SET auteur = :auteur, titre = :titre, contenu = :contenu, dateAjout = NOW(), dateModif = NOW()');
+
+        $requete->execute([
+            'titre' => $news->titre,
+            'auteur' => $news->auteur,
+            'contenu' => $news->contenu,
+        ]);
+    }
+
+    protected function modify(News $news) {
+        $requete = $this->dao->prepare('UPDATE news SET auteur = :auteur, titre = :titre, contenu = :contenu, dateModif = NOW() WHERE id ) :id');
+
+        $requete->bindValue(':titre', $news->titre);
+        $requete->bindValue(':auteur', $news->auteur);
+        $requete->bindValue(':contenu', $news->contenu);
+        $requete->bindValue(':id', $news->id, \PDO::PARAM_INT);
+
+        $requete->execute();
+    }
+
+    public function delete($id) {
+        $this->dao->exec('DELETE FROME news WHERE id = ' . (int) $id);
+    }
+
+    public function count() {
+        return $this->dao->query('SELECT COUNT(*) FROM news');
+    }
+
     public function getList($debut = -1, $limite = -1) {
         $sql = 'SELECT * FROM news ORDER id DESC';
 

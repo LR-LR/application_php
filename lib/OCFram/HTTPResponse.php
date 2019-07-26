@@ -1,7 +1,7 @@
 <?php
 namespace OCFram;
 
-class HTTPResponse implements ApplicationComponent {
+class HTTPResponse extends ApplicationComponent {
     protected $page;
 
     public function addHeader($header) {
