@@ -5,6 +5,8 @@ abstract class Entity implements \ArrayAccess {
     protected $erreurs = [];
     protected $id;
 
+    use Hydrator;
+
     public function __construct(array $donnees = []) {
         if (!empty($donnees)) {
             $this->hydrate($donnees);
@@ -21,16 +23,6 @@ abstract class Entity implements \ArrayAccess {
 
     public function setId($id) {
         $this->id = (int) $id;
-    }
-
-    public function hydrate(array $donnees) {
-        foreach ($donnees as $attribut => $valeur) {
-            $methode = 'set' . ucfirst($attribut);
-
-            if (is_callable([$this, $methode])) {
-                $this->$methode($valeur);
-            }
-        }
     }
 
     public function offsetGet($var) {

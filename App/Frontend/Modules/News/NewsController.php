@@ -2,6 +2,7 @@
 namespace App\Frontend\Modules\News;
 
 use \Entity\Comment;
+use \FormBuilder\CommentFormBuilder;
 use \OCFram\BackController;
 use \OCFram\HTTPRequest;
 
@@ -44,26 +45,32 @@ class NewsController extends BackController {
     }
 
     public function executeInsertComment(HTTPRequest $request) {
-        $this->page->addVar('title', 'Ajout d\'un commentaire');
-
-        if ($request->postExists('pseudo')) {
+        // Si le formulaire a été envoyé, on crée le commentaire avec les valeurs du formulaire.
+        if ($request->method == 'POST') {
             $comment = new Comment([
                 'news' => $request->getData('news'),
-                'auteur' => $request->getData('pseudo'),
+                'auteur' => $request->getData('auteur'),
                 'contenu' => $request->getData('contenu'),
             ]);
-
-            if ($comment->isValid()) {
-                $this->managers->getManagerOf('Comments')->save($comment);
-
-                $this->app->user->setFlash('Le commentaire a bien été ajouté, merci !');
-
-                $this->app->httpResponse->redirect('news-' . $request->getData('news') . 'html');
-            } else {
-                $this->page->addVar('erreurs', $comment->erreurs);
-            }
-
-            $this->page->addVar('comment', $comment);
+        } else {
+            $comment = new Comment;
         }
+
+        $formBuilder = new CommentFormBuilder($comment);
+        $formBuilder->build();
+
+        $form = $formBuilder->form;
+
+        $formHandler = new \OCFram\FormHandler($form, $this->managers->getManagerOf('Comments'), $request);
+
+        if ($formHandler->process()) {
+            $this->managers->getManagerOf('Comments')->save($comment);
+            $this->app->user->setFlash('Le commentaire a bien été ajouté, merci !');
+            $this->app->httpResponse->redirect('news-' . $request->getData('news') . '.html');
+        }
+
+        $this->page->addVar('comment', $comment);
+        $this->page->addVar('form', $form->createView()); // On passe le formulaire généré à la vue
+        $this->page->addVar('title', 'Ajout d\'un commentaire');
     }
 }
